@@ -18,3 +18,5 @@
     name: fail2ban
     state: started
     enabled: true
+  # On a fresh server the package is only simulated in --check mode
+  ignore_errors: "{{ ansible_check_mode }}"

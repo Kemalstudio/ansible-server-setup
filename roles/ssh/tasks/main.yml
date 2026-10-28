@@ -9,6 +9,8 @@
   ansible.builtin.assert:
     that: ssh_admin_keys.stat.exists and ssh_admin_keys.stat.size > 0
     fail_msg: "No authorized_keys for {{ admin_user }}. Refusing to harden SSH."
+  # In --check mode the admin user and key are only simulated, so the file can't exist yet
+  when: not ansible_check_mode
 
 - name: Apply hardened SSH configuration
   ansible.builtin.template:

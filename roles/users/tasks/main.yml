@@ -11,6 +11,8 @@
   ansible.posix.authorized_key:
     user: "{{ admin_user }}"
     key: "{{ admin_ssh_public_key }}"
+    path: "/home/{{ admin_user }}/.ssh/authorized_keys"
+    manage_dir: true
     exclusive: false
 
 - name: Allow admin user to use sudo without password
