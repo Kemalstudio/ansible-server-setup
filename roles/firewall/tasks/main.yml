@@ -4,27 +4,58 @@
     name: ufw
     state: present
 
-- name: Allow required TCP ports (SSH first, so we are never locked out)
-  community.general.ufw:
-    rule: allow
-    port: "{{ item }}"
-    proto: tcp
-  loop: "{{ firewall_allowed_tcp_ports }}"
+# In --check mode on a fresh server UFW is only simulated, so the ufw binary doesn't exist yet
+- name: Check that UFW is installed
+  ansible.builtin.stat:
+    path: /usr/sbin/ufw
+  register: firewall_ufw_bin
 
-- name: Rate-limit SSH connections
-  community.general.ufw:
-    rule: limit
-    port: "{{ ssh_port }}"
-    proto: tcp
+- name: Configure UFW
+  when: firewall_ufw_bin.stat.exists
+  block:
+    - name: Allow required TCP ports (SSH first, so we are never locked out)
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop: "{{ firewall_allowed_tcp_ports }}"
 
-- name: Allow routed (forwarded) traffic on NAT gateways
-  community.general.ufw:
-    direction: routed
-    default: allow
-  when: firewall_allow_routing | bool
+    - name: Rate-limit SSH connections
+      community.general.ufw:
+        rule: limit
+        port: "{{ ssh_port }}"
+        proto: tcp
 
-- name: Deny all other incoming traffic and enable UFW
-  community.general.ufw:
-    state: enabled
-    policy: deny
-    direction: incoming
+    # ---------- NAT gateway (only when firewall_allow_routing is true) ----------
+    - name: Enable IP forwarding for UFW
+      ansible.builtin.lineinfile:
+        path: /etc/ufw/sysctl.conf
+        regexp: '^#?\s*net/ipv4/ip_forward\s*='
+        line: net/ipv4/ip_forward=1
+      when: firewall_allow_routing | bool
+      notify: Reload ufw
+
+    - name: Add NAT (masquerade) rules to UFW
+      ansible.builtin.blockinfile:
+        path: /etc/ufw/before.rules
+        insertbefore: BOF
+        marker: "# {mark} ANSIBLE MANAGED NAT"
+        block: |
+          *nat
+          :POSTROUTING ACCEPT [0:0]
+          -A POSTROUTING -s {{ firewall_nat_source }} -o {{ firewall_nat_out_interface }} -j MASQUERADE
+          COMMIT
+      when: firewall_allow_routing | bool
+      notify: Reload ufw
+
+    - name: Allow routed (forwarded) traffic on NAT gateways
+      community.general.ufw:
+        direction: routed
+        default: allow
+      when: firewall_allow_routing | bool
+
+    - name: Deny all other incoming traffic and enable UFW
+      community.general.ufw:
+        state: enabled
+        policy: deny
+        direction: incoming

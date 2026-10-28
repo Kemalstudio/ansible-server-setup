@@ -30,6 +30,9 @@ firewall_allowed_tcp_ports:
 # Set to true on servers that route traffic for other machines (NAT gateway).
 # Allows forwarded traffic through UFW, otherwise clients behind the server lose internet.
 firewall_allow_routing: false
+# Used only when firewall_allow_routing is true
+firewall_nat_source: "192.168.50.0/24"     # internal network behind the gateway
+firewall_nat_out_interface: "eth0"         # interface that goes to the internet
 
 # ---------- fail2ban ----------
 fail2ban_bantime: "1h"

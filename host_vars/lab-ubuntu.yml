@@ -1,4 +1,6 @@
 ---
 # lab-ubuntu is a NAT gateway for the Kali VM on the internal network
 firewall_allow_routing: true
+firewall_nat_source: "192.168.50.0/24"   # enp0s8 — internal lab network
+firewall_nat_out_interface: "enp0s3"     # VirtualBox NAT adapter, goes to the internet
 install_docker: false
