@@ -3,8 +3,11 @@
 bantime  = {{ fail2ban_bantime }}
 findtime = {{ fail2ban_findtime }}
 maxretry = {{ fail2ban_maxretry }}
-backend  = systemd
 
 [sshd]
 enabled = true
 port    = {{ ssh_port }}
+# Read /var/log/auth.log: works on all Ubuntu releases.
+# The systemd journal backend looks for "sshd.service", but Ubuntu names the unit "ssh.service".
+backend = auto
+logpath = %(sshd_log)s

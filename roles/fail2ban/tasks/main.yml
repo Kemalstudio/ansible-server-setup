@@ -1,7 +1,9 @@
 ---
-- name: Install fail2ban
+- name: Install fail2ban and rsyslog (fail2ban reads /var/log/auth.log)
   ansible.builtin.apt:
-    name: fail2ban
+    name:
+      - fail2ban
+      - rsyslog
     state: present
 
 - name: Configure fail2ban jail for SSH
