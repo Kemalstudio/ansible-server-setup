@@ -27,11 +27,16 @@ firewall_allowed_tcp_ports:
   - 80
   - 443
 
+# Set to true on servers that route traffic for other machines (NAT gateway).
+# Allows forwarded traffic through UFW, otherwise clients behind the server lose internet.
+firewall_allow_routing: false
+
 # ---------- fail2ban ----------
 fail2ban_bantime: "1h"
 fail2ban_findtime: "10m"
 fail2ban_maxretry: 5
 
 # ---------- Optional components ----------
+# Docker sets the FORWARD policy to DROP — keep it off on NAT gateways
 install_docker: true
 install_nginx: true

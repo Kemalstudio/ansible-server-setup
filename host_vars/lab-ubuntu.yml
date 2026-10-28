@@ -1,0 +1,4 @@
+---
+# lab-ubuntu is a NAT gateway for the Kali VM on the internal network
+firewall_allow_routing: true
+install_docker: false

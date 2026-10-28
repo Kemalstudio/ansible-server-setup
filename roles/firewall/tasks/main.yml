@@ -17,6 +17,12 @@
     port: "{{ ssh_port }}"
     proto: tcp
 
+- name: Allow routed (forwarded) traffic on NAT gateways
+  community.general.ufw:
+    direction: routed
+    default: allow
+  when: firewall_allow_routing | bool
+
 - name: Deny all other incoming traffic and enable UFW
   community.general.ufw:
     state: enabled
