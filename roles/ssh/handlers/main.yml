@@ -1,0 +1,13 @@
+---
+# Ubuntu 22.10+ starts SSH through ssh.socket; older releases use ssh.service
+- name: Restart ssh
+  ansible.builtin.shell: |
+    set -e
+    if systemctl is-enabled --quiet ssh.socket 2>/dev/null; then
+      systemctl daemon-reload
+      systemctl restart ssh.socket
+    fi
+    systemctl restart ssh
+  args:
+    executable: /bin/bash
+  changed_when: true

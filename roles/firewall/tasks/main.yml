@@ -1,0 +1,24 @@
+---
+- name: Install UFW
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+
+- name: Allow required TCP ports (SSH first, so we are never locked out)
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: "{{ firewall_allowed_tcp_ports }}"
+
+- name: Rate-limit SSH connections
+  community.general.ufw:
+    rule: limit
+    port: "{{ ssh_port }}"
+    proto: tcp
+
+- name: Deny all other incoming traffic and enable UFW
+  community.general.ufw:
+    state: enabled
+    policy: deny
+    direction: incoming

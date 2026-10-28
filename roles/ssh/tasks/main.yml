@@ -1,0 +1,21 @@
+---
+# Safety check: never disable password login unless the admin key is really in place
+- name: Check that the admin user has an authorized SSH key
+  ansible.builtin.stat:
+    path: "/home/{{ admin_user }}/.ssh/authorized_keys"
+  register: ssh_admin_keys
+
+- name: Stop if the admin key is missing (prevents locking yourself out)
+  ansible.builtin.assert:
+    that: ssh_admin_keys.stat.exists and ssh_admin_keys.stat.size > 0
+    fail_msg: "No authorized_keys for {{ admin_user }}. Refusing to harden SSH."
+
+- name: Apply hardened SSH configuration
+  ansible.builtin.template:
+    src: 99-hardening.conf.j2
+    dest: /etc/ssh/sshd_config.d/99-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: Restart ssh

@@ -1,0 +1,28 @@
+---
+- name: Set up and harden an Ubuntu server
+  hosts: servers
+  become: true
+
+  pre_tasks:
+    - name: Make sure the target is Ubuntu
+      ansible.builtin.assert:
+        that: ansible_facts['distribution'] == "Ubuntu"
+        fail_msg: "This playbook supports Ubuntu only (found {{ ansible_facts['distribution'] }})."
+
+  roles:
+    - role: common
+      tags: [common]
+    - role: users
+      tags: [users]
+    - role: ssh
+      tags: [ssh]
+    - role: firewall
+      tags: [firewall]
+    - role: fail2ban
+      tags: [fail2ban]
+    - role: docker
+      tags: [docker]
+      when: install_docker | bool
+    - role: nginx
+      tags: [nginx]
+      when: install_nginx | bool

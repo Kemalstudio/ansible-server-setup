@@ -1,0 +1,13 @@
+# Real inventory with server IPs stays local
+inventory/hosts.ini
+
+# Secrets
+*.vault
+.vault_pass*
+*.pem
+*.key
+
+# Python / Ansible
+*.retry
+__pycache__/
+.venv/

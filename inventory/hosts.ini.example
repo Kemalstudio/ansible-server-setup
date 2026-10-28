@@ -1,0 +1,8 @@
+# Copy this file to hosts.ini and put your server address there.
+# hosts.ini is in .gitignore so real IPs never get committed.
+
+[servers]
+lab-ubuntu ansible_host=192.168.56.10 ansible_user=kemal
+
+# Examples:
+# vps-germany ansible_host=203.0.113.10 ansible_user=root

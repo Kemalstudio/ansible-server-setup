@@ -1,0 +1,14 @@
+# Managed by Ansible — manual changes will be overwritten
+Port {{ ssh_port }}
+PermitRootLogin {{ ssh_permit_root_login }}
+PasswordAuthentication {{ ssh_password_authentication }}
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+PermitEmptyPasswords no
+MaxAuthTries {{ ssh_max_auth_tries }}
+LoginGraceTime 30
+X11Forwarding no
+AllowUsers {{ admin_user }}
+
+ClientAliveInterval 300
+ClientAliveCountMax 2
