@@ -13,18 +13,20 @@
 - name: Configure UFW
   when: firewall_ufw_bin.stat.exists
   block:
-    - name: Allow required TCP ports (SSH first, so we are never locked out)
-      community.general.ufw:
-        rule: allow
-        port: "{{ item }}"
-        proto: tcp
-      loop: "{{ firewall_allowed_tcp_ports }}"
-
-    - name: Rate-limit SSH connections
+    # SSH goes first, so we are never locked out. "limit" also allows the port,
+    # so SSH is not repeated below (allow + limit on one port would overwrite each other on every run)
+    - name: Allow SSH with rate limiting
       community.general.ufw:
         rule: limit
         port: "{{ ssh_port }}"
         proto: tcp
+
+    - name: Allow other required TCP ports
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop: "{{ firewall_allowed_tcp_ports | map('string') | reject('equalto', ssh_port | string) | list }}"
 
     # ---------- NAT gateway (only when firewall_allow_routing is true) ----------
     - name: Enable IP forwarding for UFW
